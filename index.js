@@ -34,7 +34,7 @@ async function run() {
     app.get('/products', async(req,res)=>{
       const cursor = productsCollection.find({});
       const products = await cursor.toArray();
-      res.send(products)
+      res.json(products)
     })
     .then(console.log('insert success'))
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
