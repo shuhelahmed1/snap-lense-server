@@ -1,6 +1,7 @@
 const express = require('express');
-app = express();
-port = process.env.Port || 5000;
+const app = express(); // Added 'const' to define app
+const port = process.env.PORT || 5000; // Fixed 'Port' to 'PORT' for environment variable
+
 const { MongoClient, ServerApiVersion } = require('mongodb');
 
 const cors = require('cors');
@@ -20,36 +21,39 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    // Connect the client to the server	(optional starting in v4.7)
+    // Connect the client to the server (optional starting in v4.7)
     await client.connect();
     // Send a ping to confirm a successful connection
-    const database =  client.db("sanp-lense");
+    const database = client.db("sanp-lense");
     const productsCollection = database.collection('products');
+    
+    // Insert a product
     const product = {
         name: 'apple',
         detail: 'apple detail'
-    }
-    productsCollection.insertOne(product)
+    };
+    await productsCollection.insertOne(product); // Added 'await' to ensure proper insertion
 
-    app.get('/products', async(req,res)=>{
+    // Endpoint to get products
+    app.get('/products', async (req, res) => {
       const cursor = productsCollection.find({});
       const products = await cursor.toArray();
-      res.json(products)
-    })
-    .then(console.log('insert success'))
+      res.json(products);
+    });
+
+    console.log('Insert success'); // Moved the console log outside of .then()
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
-    // await client.close();
+    // await client.close(); // Commented out for continuous server operation
   }
 }
 run().catch(console.dir);
 
+app.get('/', (req, res) => {
+    res.send('running my crud');
+});
 
-app.get('/',(req,res)=>{
-    res.send('running my crud')
-})
-
-app.listen(port, ()=>{
+app.listen(port, () => {
     console.log('running server on port', port);
-})
+});
