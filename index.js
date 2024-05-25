@@ -1,6 +1,6 @@
 const express = require('express');
-const app = express(); // Added 'const' to define app
-const port = process.env.PORT || 5000; // Fixed 'Port' to 'PORT' for environment variable
+const app = express();
+const port = process.env.PORT || 5000;
 
 const { MongoClient, ServerApiVersion } = require('mongodb');
 
@@ -10,7 +10,6 @@ app.use(express.json());
 
 const uri = "mongodb+srv://dbuser2:v8ERc49mGZRUKNFS@cluster0.ypbjopw.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -21,31 +20,31 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    // Connect the client to the server (optional starting in v4.7)
     await client.connect();
-    // Send a ping to confirm a successful connection
     const database = client.db("sanp-lense");
     const productsCollection = database.collection('products');
     
-    // Insert a product
     const product = {
         name: 'apple',
         detail: 'apple detail'
     };
-    await productsCollection.insertOne(product); // Added 'await' to ensure proper insertion
+    await productsCollection.insertOne(product);
 
-    // Endpoint to get products
     app.get('/products', async (req, res) => {
-      const cursor = productsCollection.find({});
-      const products = await cursor.toArray();
-      res.json(products);
+      try {
+        const cursor = productsCollection.find({});
+        const products = await cursor.toArray();
+        res.json(products);
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to fetch products' });
+      }
     });
 
-    console.log('Insert success'); // Moved the console log outside of .then()
+    console.log("Insert success");
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
-  } finally {
-    // Ensures that the client will close when you finish/error
-    // await client.close(); // Commented out for continuous server operation
+  } catch (err) {
+    console.error('Failed to connect to MongoDB', err);
   }
 }
 run().catch(console.dir);
